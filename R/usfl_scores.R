@@ -4,7 +4,7 @@
 #'
 #' @return A dataframe
 #' @export
-load_usfl_scores_in_week <- function(week){
+usfl_load_scores_in_week <- function(week){
   cli::cli_process_start("Load and Parse Week {.val {week}}")
 
   scores <- load_from_usfl_path("league", "scores-segment", paste0("w", week))
@@ -25,11 +25,11 @@ load_usfl_scores_in_week <- function(week){
 
 #' Load Scores of Multiple USFL Weeks
 #'
-#' @description This is a wrapper around [load_usfl_scores_in_week()]
+#' @description This is a wrapper around [usfl_load_scores_in_week()]
 #' @param weeks Weeks to load and combine
 #'
 #' @return A dataframe
 #' @export
-load_usfl_scores <- function(weeks = 1:10){
-  purrr::map_dfr(weeks, load_usfl_scores_in_week)
+usfl_load_scores <- function(weeks = 1:10){
+  purrr::map_dfr(weeks, usfl_load_scores_in_week)
 }

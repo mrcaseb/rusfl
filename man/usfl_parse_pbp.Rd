@@ -7,7 +7,7 @@
 usfl_parse_pbp(raw_game_data)
 }
 \arguments{
-\item{raw_game_data}{Raw data loaded with \code{\link[=load_usfl_game_data]{load_usfl_game_data()}}}
+\item{raw_game_data}{Raw data loaded with \code{\link[=usfl_load_game_data]{usfl_load_game_data()}}}
 }
 \value{
 A tibble with pbp

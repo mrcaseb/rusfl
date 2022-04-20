@@ -1,5 +1,5 @@
 scrape_usfl_roster <- function(){
-  team_slucks <- load_usfl_teams() |>
+  team_slucks <- usfl_load_teams() |>
     mutate(
       sluck = str_replace_all(team_name, " ", "-"),
       sluck = paste0(tolower(sluck), "-team-roster")

@@ -4,8 +4,8 @@
 #' @export
 #'
 #' @examples
-#' load_usfl_teams()
-load_usfl_teams <- function(){
+#' usfl_load_teams()
+usfl_load_teams <- function(){
   teams <- nflreadr::csv_from_url("https://github.com/ajreinhard/USFL/raw/main/data/teams.csv", header = TRUE)
   janitor::remove_empty(teams, "cols")
 }

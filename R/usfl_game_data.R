@@ -3,7 +3,7 @@
 #' @param usfl_game_id USFL game id, e.g. "usfl2"
 #' @export
 #' @return list of game data
-load_usfl_game_data <- function(usfl_game_id){
+usfl_load_game_data <- function(usfl_game_id){
   cli::cli_process_start("Load and Parse Week {.val {usfl_game_id}}")
 
   id <- stringr::str_extract(usfl_game_id, "[:digit:]+")
@@ -17,7 +17,7 @@ load_usfl_game_data <- function(usfl_game_id){
 
 #' Extract and Parse PBP Date from Raw USFL Game Data
 #'
-#' @param raw_game_data Raw data loaded with [load_usfl_game_data()]
+#' @param raw_game_data Raw data loaded with [usfl_load_game_data()]
 #'
 #' @return A tibble with pbp
 #' @export
