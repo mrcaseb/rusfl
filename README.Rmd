@@ -32,3 +32,68 @@ devtools::install_github("mrcaseb/rusfl")
 ## NOTE
 
 This USFL api requires an api key that is not provided with this package.
+
+## Examples
+
+### Load Basic Team Info
+
+This will be loaded from Anthony Reinhard's Github.
+
+```{r message=FALSE, warning=FALSE}
+teams <- rusfl::usfl_load_teams()
+dplyr::glimpse(teams)
+```
+
+### Load Game Info for multiple Weeks
+
+The best way is to use the wrapper `rusfl::usfl_load_scores()` and choose the weeks. 
+
+```{r message=FALSE, warning=FALSE}
+games <- rusfl::usfl_load_scores(1:2)
+dplyr::glimpse(games)
+```
+
+### Load Rosters
+
+The best way is to use the wrapper `rusfl::usfl_load_rosters()` and choose the teams. The default loads all teams.
+
+```{r message=FALSE, warning=FALSE}
+roster <- rusfl::usfl_load_rosters()
+roster
+```
+
+### Load Raw Game Data
+
+Boxscores and Play by Play will be extracted from raw game data. So we have to load the raw game data first. The game ids are included in `games`. In this example these are `r `cli::cli_text("{games$id}")`. 
+
+```{r message=FALSE, warning=FALSE}
+raw <- rusfl::usfl_load_game_data("usfl3")
+```
+
+This will be a list of deeply nested lists. The structure is
+
+```{r}
+str(raw, max.level = 2)
+```
+
+Play by Play can be parsed with
+
+```{r message=FALSE, warning=FALSE}
+pbp <- rusfl::usfl_parse_pbp(raw)
+dplyr::glimpse(pbp)
+```
+
+Boxscore data can be parsed on the player level or on the team level.
+
+Team level will look like this
+
+```{r message=FALSE, warning=FALSE}
+rusfl::usfl_parse_boxscores(raw, "teams")
+```
+
+ans player level will look like this
+
+```{r message=FALSE, warning=FALSE}
+player_stats <- rusfl::usfl_parse_boxscores(raw)
+dplyr::glimpse(player_stats)
+```
