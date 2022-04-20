@@ -7,7 +7,7 @@
 usfl_load_scores_in_week <- function(week){
   cli::cli_process_start("Load and Parse Week {.val {week}}")
 
-  scores <- load_from_usfl_path("league", "scores-segment", paste0("w", week))
+  scores <- usfl_load_from_path("league", "scores-segment", paste0("w", week))
 
   out <- scores$sectionList |>
     dplyr::rename(week_day = id) |>

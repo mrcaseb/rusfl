@@ -8,7 +8,7 @@ usfl_load_game_data <- function(usfl_game_id){
 
   id <- stringr::str_extract(usfl_game_id, "[:digit:]+")
 
-  game_data <- load_from_usfl_path("event", id, "data")
+  game_data <- usfl_load_from_path("event", id, "data")
 
   cli::cli_process_done()
 
