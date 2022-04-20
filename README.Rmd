@@ -64,7 +64,13 @@ roster
 
 ### Load Raw Game Data
 
-Boxscores and Play by Play will be extracted from raw game data. So we have to load the raw game data first. The game ids are included in `games`. In this example these are `r `cli::cli_text("{games$id}")`. 
+Boxscores and Play by Play will be extracted from raw game data. So we have to load the raw game data first. The game ids are included in `games`. In this example these are 
+
+```{r}
+cli::cli_text("{games$id}")
+```
+
+Let's load `usfl3`
 
 ```{r message=FALSE, warning=FALSE}
 raw <- rusfl::usfl_load_game_data("usfl3")

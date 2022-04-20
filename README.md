@@ -151,7 +151,14 @@ roster
 
 Boxscores and Play by Play will be extracted from raw game data. So we
 have to load the raw game data first. The game ids are included in
-`games`. In this example these are `r`cli::cli_text(“{games$id}”)\`.
+`games`. In this example these are
+
+``` r
+cli::cli_text("{games$id}")
+#> usfl1, usfl2, usfl3, usfl4, usfl5, usfl6, usfl7, and usfl8
+```
+
+Let’s load `usfl3`
 
 ``` r
 raw <- rusfl::usfl_load_game_data("usfl3")
