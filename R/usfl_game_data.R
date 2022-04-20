@@ -74,4 +74,5 @@ usfl_parse_boxscores <- function(raw_game_data){
         .fns = as.numeric
       ))
   })
+  player_stats
 }
