@@ -39,12 +39,16 @@ usfl_parse_pbp <- function(raw_game_data){
 #' Extract and Parse Player Stats from Raw USFL Game Data
 #'
 #' @param raw_game_data Raw data loaded with [usfl_load_game_data()]
+#' @param type One of "players" or "teams". Choose type of stat output.
 #'
-#' @return A tibble with player stats
+#' @return A tibble with player/team stats
 #' @export
-usfl_parse_boxscores <- function(raw_game_data){
+usfl_parse_boxscores <- function(raw_game_data, type = c("players", "teams")){
   # for testing
   # raw_game_data <- usfl_load_game_data(2)
+
+  type <- rlang::arg_match(type)
+
   suppressWarnings({# numeric conversion causes irrelevant warnings
     player_stats <- seq_len(length(raw_game_data$boxscore$boxscoreSections$boxscoreItems) -1) |>
       purrr::map_dfr(function(j, raw_game_data){
@@ -72,7 +76,29 @@ usfl_parse_boxscores <- function(raw_game_data){
       dplyr::mutate(dplyr::across(
         .cols = !tidyselect::any_of(c("team", "player_name", "passing_com")),
         .fns = as.numeric
-      ))
+      ),
+      game_id = raw_game_data$header$id
+      ) |>
+      dplyr::select(game_id, dplyr::everything())
   })
-  player_stats
+
+  team_stats <- raw_game_data$boxscore$boxscoreSections$boxscoreMatchup[[3]] |>
+    dplyr::rename(type = title) |>
+    tidyr::unnest(rows) |>
+    janitor::clean_names() |>
+    dplyr::mutate(
+      away_team = raw_game_data$header$leftTeam$name,
+      home_team = raw_game_data$header$rightTeam$name,
+      game_id = raw_game_data$header$id
+    ) |>
+    dplyr::select(
+      game_id, type, title,
+      away_team, away_stat = left_stat,
+      home_stat = right_stat, home_team
+    )
+
+  switch(type,
+    "players" = player_stats,
+    "teams" = team_stats
+  )
 }

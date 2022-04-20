@@ -4,13 +4,15 @@
 \alias{usfl_parse_boxscores}
 \title{Extract and Parse Player Stats from Raw USFL Game Data}
 \usage{
-usfl_parse_boxscores(raw_game_data)
+usfl_parse_boxscores(raw_game_data, type = c("players", "teams"))
 }
 \arguments{
 \item{raw_game_data}{Raw data loaded with \code{\link[=usfl_load_game_data]{usfl_load_game_data()}}}
+
+\item{type}{One of "players" or "teams". Choose type of stat output.}
 }
 \value{
-A tibble with player stats
+A tibble with player/team stats
 }
 \description{
 Extract and Parse Player Stats from Raw USFL Game Data
