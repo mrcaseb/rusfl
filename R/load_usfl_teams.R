@@ -6,6 +6,7 @@
 #' @examples
 #' usfl_load_teams()
 usfl_load_teams <- function(){
-  teams <- nflreadr::csv_from_url("https://github.com/ajreinhard/USFL/raw/main/data/teams.csv", header = TRUE)
-  janitor::remove_empty(teams, "cols")
+  nflreadr::csv_from_url("https://github.com/ajreinhard/USFL/raw/main/data/teams.csv", header = TRUE) |>
+    janitor::remove_empty("cols") |>
+    tibble::as_tibble()
 }
