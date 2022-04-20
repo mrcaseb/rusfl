@@ -1,3 +1,4 @@
+#### DEPRECATED ####
 scrape_usfl_roster <- function(){
   team_slucks <- usfl_load_teams() |>
     mutate(
@@ -47,5 +48,3 @@ scrape_usfl_roster <- function(){
     out
   }, team_slucks = team_slucks)
 }
-
-# all_roster <- scrape_usfl_roster()
