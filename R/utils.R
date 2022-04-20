@@ -23,3 +23,23 @@ usfl_get_api_key <- function() {
   }
   key
 }
+
+#' Get valid USFL Team Abbreviations and Corresponding API IDs
+#'
+#' @param abbr A valid abbreviation for which to output the ID and name.
+#'   The default `NULL` returns all IDs and names.
+#'
+#' @return A named vector.
+#' @export
+#'
+#' @examples
+#' usfl_team_abbreviations()
+#' usfl_team_abbreviations(c("BHAM", "HOU"))
+usfl_team_abbreviations <- function(abbr = NULL){
+  ids <- c("BHAM", "HOU", "MICH", "NJ", "NO", "PHI", "PIT", "TB")
+  vec <- c(     2,     6,     11,   12,    7,     4,    16,   18)
+  names(vec) <- ids
+  if (is.null(abbr)) return(vec)
+  vec[abbr]
+}
+
