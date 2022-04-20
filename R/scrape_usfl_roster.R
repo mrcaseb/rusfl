@@ -48,4 +48,4 @@ scrape_usfl_roster <- function(){
   }, team_slucks = team_slucks)
 }
 
-all_roster <- scrape_usfl_roster()
+# all_roster <- scrape_usfl_roster()

@@ -1,4 +1,11 @@
+#' Load USFL Teams File from Anthony Reinhard's Github
+#'
+#' @return A dataframe
+#' @export
+#'
+#' @examples
+#' load_usfl_teams()
 load_usfl_teams <- function(){
-  nflreadr::csv_from_url("https://github.com/ajreinhard/USFL/raw/main/data/teams.csv", header = TRUE) |>
-    janitor::remove_empty("cols")
+  teams <- nflreadr::csv_from_url("https://github.com/ajreinhard/USFL/raw/main/data/teams.csv", header = TRUE)
+  janitor::remove_empty(teams, "cols")
 }

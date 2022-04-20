@@ -1,0 +1,24 @@
+Package: rusfl
+Title: Load and Parse USFL Data
+Version: 0.0.1
+Authors@R: 
+    person("Sebastian", "Carl", , "mrcaseb@gmail.com", role = c("aut", "cre"))
+Description: What the package does (one paragraph).
+License: MIT + file LICENSE
+Depends: 
+    R (>= 4.1)
+Imports: 
+    cli (>= 3.1.0),
+    dplyr (>= 1.0),
+    httr2 (>= 0.1.1),
+    janitor (>= 2.1.0),
+    nflreadr (>= 1.2.0),
+    purrr (>= 0.3.4),
+    rlang,
+    tidyr (>= 1.2.0),
+    tidyselect (>= 1.1.2)
+Suggests: 
+    askpass (>= 1.1)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2

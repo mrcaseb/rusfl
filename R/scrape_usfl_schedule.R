@@ -1,11 +1,11 @@
-library(rvest)
-library(xml2)
-
+#### DEPRECATED ####
 scrape_usfl_schedule <- function(){
   raw <- read_html("https://www.theusfl.com/schedule")
   weeks <- xml_find_all(raw, "//section[contains(concat(' ',normalize-space(@id),' '),'w')]")
   out <-
     purrr::map_dfr(weeks, function(w){
+      # for testing
+      w <- weeks[[1]]
       week <- xml_find_all(w, './/*[@class="heading"]') |> xml_text(trim = TRUE)
       game_days <- xml_find_all(w, './/*[@class="title"]') |> xml_text(trim = TRUE)
 
