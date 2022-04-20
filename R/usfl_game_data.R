@@ -15,7 +15,7 @@ usfl_load_game_data <- function(usfl_game_id){
   game_data
 }
 
-#' Extract and Parse PBP Date from Raw USFL Game Data
+#' Extract and Parse PBP Data from Raw USFL Game Data
 #'
 #' @param raw_game_data Raw data loaded with [usfl_load_game_data()]
 #'
@@ -36,3 +36,42 @@ usfl_parse_pbp <- function(raw_game_data){
     dplyr::select(game_id, dplyr::everything())
 }
 
+#' Extract and Parse Player Stats from Raw USFL Game Data
+#'
+#' @param raw_game_data Raw data loaded with [usfl_load_game_data()]
+#'
+#' @return A tibble with player stats
+#' @export
+usfl_parse_boxscores <- function(raw_game_data){
+  # for testing
+  # raw_game_data <- usfl_load_game_data(2)
+  suppressWarnings({# numeric conversion causes irrelevant warnings
+    player_stats <- seq_len(length(raw_game_data$boxscore$boxscoreSections$boxscoreItems) -1) |>
+      purrr::map_dfr(function(j, raw_game_data){
+        team <- raw_game_data$boxscore$boxscoreSections$boxscoreItems[[j]]
+        abbr <- c(raw_game_data$header$leftTeam$name, raw_game_data$header$rightTeam$name)[[j]]
+        purrr::map_dfr(seq_along(team$boxscoreTable$headers), function(i, team){
+          names <- team$boxscoreTable$headers[[i]]$columns[[1]]$text |> tolower()
+          names <- paste0(names[[1]], "_", names)
+          names[[1]] <- "player_name"
+          rows <- team$boxscoreTable$rows[[i]]$columns |>
+            purrr::map_dfr(function(k, names){
+              values <- k$text
+              names(values) <- names
+              tibble::as_tibble_row(values)
+            }, names = names)
+        }, team = team) |>
+          dplyr::mutate(team = abbr) |>
+          dplyr::select(team, dplyr::everything())
+      }, raw_game_data = raw_game_data) |>
+      dplyr::filter(player_name != "TOTALS") |>
+      dplyr::group_by(team, player_name) |>
+      dplyr::summarise(dplyr::across(.fns = function(x) dplyr::first(stats::na.omit(x)))) |>
+      dplyr::ungroup() |>
+      janitor::clean_names() |>
+      dplyr::mutate(dplyr::across(
+        .cols = !tidyselect::any_of(c("team", "player_name", "passing_com")),
+        .fns = as.numeric
+      ))
+  })
+}
