@@ -15,7 +15,7 @@ You can install the development version of rusfl from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("mrcaseb/usfl")
+devtools::install_github("mrcaseb/rusfl")
 ```
 
 ## NOTE
