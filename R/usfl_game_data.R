@@ -115,7 +115,6 @@ usfl_parse_pbp <- function(raw_game_data){
       away_timeout = dplyr::if_else(timeout_team == away_team, 1, 0, missing = 0),
       home_timeout = dplyr::if_else(timeout_team == home_team, 1, 0, missing = 0),
       defteam = ifelse(posteam == home_team, away_team, home_team),
-
       game_half = ifelse(qtr < 3, 'Half1', 'Half2')
     ) |>
     tidyr::fill(c(away_score, home_score)) |>

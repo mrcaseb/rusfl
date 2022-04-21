@@ -97,7 +97,7 @@ Team level will look like this
 rusfl::usfl_parse_boxscores(raw, "teams")
 ```
 
-ans player level will look like this
+and player level will look like this
 
 ```{r message=FALSE, warning=FALSE}
 player_stats <- rusfl::usfl_parse_boxscores(raw)
