@@ -43,6 +43,30 @@ usfl_team_abbreviations <- function(abbr = NULL){
   vec[abbr]
 }
 
+#' Get valid USFL Team Abbreviations from Full Names
+#'
+#' @param full_name A valid USFL full team name for which to output the abbreviation.
+#'   The default `NULL` returns all abbreviations.
+#'
+#' @return A named vector.
+#' @export
+usfl_abbreviation_from_full_name <- function(full_name = NULL){
+  vec <- c("BHAM", "HOU", "MICH", "NJ", "NO", "PHI", "PIT", "TB")
+  ids <- c(
+    'Birmingham Stallions',
+    'Houston Gamblers',
+    'Michigan Panthers',
+    'New Jersey Generals',
+    'New Orleans Breakers',
+    'Philadelphia Stars',
+    'Pittsburgh Maulers',
+    'Tampa Bay Bandits'
+  )
+  names(vec) <- ids
+  if (is.null(full_name)) return(vec)
+  vec[full_name]
+}
+
 # from nflfastR
 # take a time string of the format "MM:SS" and convert it to seconds
 time_to_seconds <- function(time){

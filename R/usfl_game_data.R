@@ -44,14 +44,24 @@ usfl_parse_pbp <- function(raw_game_data){
       drive_ends_in_score = as.numeric(drive_ends_in_score),
       scoring_play = play_leftTeamScoreChange | play_rightTeamScoreChange,
       scoring_play = as.numeric(scoring_play),
-      posteam = drive_entityLink$imageAltText,
+      posteam = usfl_abbreviation_from_full_name(drive_entityLink$imageAltText),
+      drive_imageAltText = usfl_abbreviation_from_full_name(drive_imageAltText),
       posteam_logo = drive_entityLink$imageUrl,
       away_team_scored = as.numeric(play_leftTeamScoreChange),
       home_team_scored = as.numeric(play_rightTeamScoreChange),
       qtr_seconds_remaining = as.integer(time_to_seconds(play_timeOfPlay)),
       qtr = 1L + cumsum(stringr::str_detect(play_playDescription, "End Quarter")),
       qtr = dplyr::if_else(qtr_seconds_remaining == 0 & dplyr::lag(qtr != 4L), qtr - 1L, qtr),
-      yds_gained = as.integer(stringr::str_extract(play_playDescription, "(?<=for |Gain of )[:graph:]{1,4}(?= yards)"))
+      yds_gained = as.integer(stringr::str_extract(play_playDescription, "(?<=for |Gain of )[:graph:]{1,4}(?= yards)")),
+      down = as.integer(stringr::str_extract(play_title, "[:digit:]")),
+      ydstogo = as.integer(stringr::str_extract(play_title, "(?<=AND )[:digit:]{1,2}")),
+      timeout_team = stringr::str_extract(play_playDescription, "(?<=Timeout #[:digit:] by )[:upper:]{2,4}"),
+      play_subtitle = if_else(play_subtitle == "50", "MID50", play_subtitle),
+      side_of_field = stringr::str_extract(play_subtitle, "[:upper:]{2,4}"),
+      yrdln = as.integer(stringr::str_extract(play_subtitle, "[:digit:]{1,2}")),
+      season = 2021,
+      roof = "open",
+      yardline_100 = dplyr::if_else(side_of_field == posteam, 100L - yrdln, yrdln),
     ) |>
     dplyr::select(!c(
       drive_entityLink,
@@ -101,9 +111,34 @@ usfl_parse_pbp <- function(raw_game_data){
         .data$qtr_seconds_remaining
       ),
       away_score = ifelse(play_id == 1, 0L, as.integer(away_score)),
-      home_score = ifelse(play_id == 1, 0L, as.integer(home_score))
+      home_score = ifelse(play_id == 1, 0L, as.integer(home_score)),
+      away_timeout = dplyr::if_else(timeout_team == away_team, 1, 0, missing = 0),
+      home_timeout = dplyr::if_else(timeout_team == home_team, 1, 0, missing = 0),
+      defteam = ifelse(posteam == home_team, away_team, home_team),
+
+      game_half = ifelse(qtr < 3, 'Half1', 'Half2')
     ) |>
-    tidyr::fill(c(away_score, home_score))
+    tidyr::fill(c(away_score, home_score)) |>
+    dplyr::mutate(
+      score_differential = ifelse(
+        posteam == home_team,
+        home_score - away_score,
+        away_score - home_score
+      )
+    ) |>
+    dplyr::group_by(game_id, game_half) |>
+    dplyr::mutate(
+      away_timeouts_remaining = 3 - cumsum(away_timeout),
+      home_timeouts_remaining = 3 - cumsum(home_timeout),
+      posteam_timeouts_remaining = ifelse(posteam == home_team, home_timeouts_remaining, away_timeouts_remaining),
+      defteam_timeouts_remaining = ifelse(defteam == home_team, home_timeouts_remaining, away_timeouts_remaining)
+    ) |>
+    dplyr::ungroup() |>
+    nflfastR::calculate_expected_points() |>
+    dplyr::select(
+      game_id:defteam_timeouts_remaining, ep,
+      dplyr::everything()
+    )
 
   out
 }
