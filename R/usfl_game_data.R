@@ -4,7 +4,7 @@
 #' @export
 #' @return list of game data
 usfl_load_game_data <- function(usfl_game_id){
-  cli::cli_process_start("Load and Parse Week {.val {usfl_game_id}}")
+  cli::cli_process_start("Load Week {.val {usfl_game_id}}")
 
   id <- stringr::str_extract(usfl_game_id, "[:digit:]+")
 
@@ -22,7 +22,9 @@ usfl_load_game_data <- function(usfl_game_id){
 #' @return A tibble with pbp
 #' @export
 usfl_parse_pbp <- function(raw_game_data){
-  tidyr::unnest_longer(raw_game_data$pbp$sections, groups, values_to = "drive") |>
+  # for testing
+  # raw_game_data <- usfl_load_game_data(2)
+  out <- tidyr::unnest_longer(raw_game_data$pbp$sections, groups, values_to = "drive") |>
     dplyr::rename(qtr = title) |>
     tidyr::unnest_wider(drive, names_sep = "_") |>
     tidyr::unnest_longer(drive_plays) |>
@@ -33,7 +35,77 @@ usfl_parse_pbp <- function(raw_game_data){
       .cols = !tidyselect::starts_with("drive_")
     ) |>
     dplyr::mutate(game_id = raw_game_data$header$id) |>
-    dplyr::select(game_id, dplyr::everything())
+    dplyr::select(game_id, dplyr::everything()) |>
+    dplyr::mutate(dplyr::across(tidyselect::ends_with("_id"), as.integer)) |>
+    dplyr::select(!tidyselect::ends_with("_imageType")) |>
+    dplyr::select(!tidyselect::ends_with("_imageUrl")) |>
+    dplyr::mutate(
+      drive_ends_in_score = drive_leftTeamScoreChange | drive_rightTeamScoreChange,
+      drive_ends_in_score = as.numeric(drive_ends_in_score),
+      scoring_play = play_leftTeamScoreChange | play_rightTeamScoreChange,
+      scoring_play = as.numeric(scoring_play),
+      posteam = drive_entityLink$imageAltText,
+      posteam_logo = drive_entityLink$imageUrl,
+      away_team_scored = as.numeric(play_leftTeamScoreChange),
+      home_team_scored = as.numeric(play_rightTeamScoreChange),
+      qtr_seconds_remaining = as.integer(time_to_seconds(play_timeOfPlay)),
+      qtr = 1L + cumsum(stringr::str_detect(play_playDescription, "End Quarter")),
+      qtr = dplyr::if_else(qtr_seconds_remaining == 0 & dplyr::lag(qtr != 4L), qtr - 1L, qtr),
+      yds_gained = as.integer(stringr::str_extract(play_playDescription, "(?<=for |Gain of )[:graph:]{1,4}(?= yards)"))
+    ) |>
+    dplyr::select(!c(
+      drive_entityLink,
+      drive_leftTeamScoreChange,
+      drive_rightTeamScoreChange,
+      play_leftTeamScoreChange,
+      play_rightTeamScoreChange,
+      play_leftTeamAbbr,
+      play_rightTeamAbbr,
+      play_qtr,
+      play_periodOfPlay,
+      drive_leftTeamScore,
+      drive_rightTeamScore
+      )) |>
+    dplyr::rename(
+      drive_result = drive_title,
+      drive_posteam = drive_imageAltText,
+      posteam_logo_alt = drive_alternateImageUrl,
+      away_team = drive_leftTeamAbbr,
+      home_team = drive_rightTeamAbbr,
+      key_player_name = play_imageAltText,
+      key_player_headshot = play_alternateImageUrl,
+      yardline = play_subtitle,
+      desc = play_playDescription,
+      game_clock = play_timeOfPlay,
+      away_score = play_leftTeamScore,
+      home_score = play_rightTeamScore,
+    ) |>
+    tidyr::separate(
+      drive_subtitle,
+      into = c("drive_plays", "drive_yards", "drive_duration"),
+      sep = " · "
+    ) |>
+    dplyr::mutate(dplyr::across(
+      .cols = c(qtr, drive_plays, drive_yards),
+      .fns = ~ as.numeric(stringr::str_extract(.x, "[:digit:]+"))
+    )) |>
+    dplyr::mutate(
+      half_seconds_remaining = dplyr::if_else(
+        .data$qtr %in% c(1, 3),
+        .data$qtr_seconds_remaining + 900L,
+        .data$qtr_seconds_remaining
+      ),
+      game_seconds_remaining = dplyr::if_else(
+        .data$qtr %in% c(1, 2, 3, 4),
+        .data$qtr_seconds_remaining + (900L * (4L - as.integer(.data$qtr))),
+        .data$qtr_seconds_remaining
+      ),
+      away_score = ifelse(play_id == 1, 0L, as.integer(away_score)),
+      home_score = ifelse(play_id == 1, 0L, as.integer(home_score))
+    ) |>
+    tidyr::fill(c(away_score, home_score))
+
+  out
 }
 
 #' Extract and Parse Player Stats from Raw USFL Game Data

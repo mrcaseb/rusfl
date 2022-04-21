@@ -43,3 +43,9 @@ usfl_team_abbreviations <- function(abbr = NULL){
   vec[abbr]
 }
 
+# from nflfastR
+# take a time string of the format "MM:SS" and convert it to seconds
+time_to_seconds <- function(time){
+  as.numeric(strptime(time, format = "%M:%S")) -
+    as.numeric(strptime("0", format = "%S"))
+}
